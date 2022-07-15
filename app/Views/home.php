@@ -8,7 +8,7 @@
 </head>
 <body>
     <form action="<?= base_url( "api/excel-to-word" )?>" method="POST" enctype="multipart/form-data">
-        <input type="file" name="excel_file" id="excel_file" accept=".xlsx"/>
+        <input type="file" name="excel_file" id="excel_file" accept=".xlsx, .csv"/>
         <hr/>
         <hr/>
         <hr/>
