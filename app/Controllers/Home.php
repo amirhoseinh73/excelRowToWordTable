@@ -2,7 +2,6 @@
 
 namespace App\Controllers;
 
-use phpDocumentor\Reflection\PseudoTypes\True_;
 use PhpOffice\PhpSpreadsheet\IOFactory as PhpExcelIOFactory;
 use PhpOffice\PhpWord\IOFactory as PhpWordIOFactory;
 use PhpOffice\PhpWord\PhpWord;
@@ -35,45 +34,82 @@ class Home extends BaseController
         $rows_and_columns = $spreadsheet->getActiveSheet()->toArray( null, true, true, true );
 
         $phpWord = new PhpWord();
-        $section = $phpWord->addSection();
 
-        // $table = $section->addTable();
+        $phpWord->setDefaultFontSize(14);
+        $phpWord->setDefaultFontName('B Nazanin');
+        
+        $sectionStyle = new \PhpOffice\PhpWord\Style\Section();
+        $sectionStyle->setColsNum( 2 );
+        $sectionStyle->setColsSpace( 400 );
+        $sectionStyle->setMarginLeft( 400 );
+        $sectionStyle->setMarginRight( 400 );
+        $sectionStyle->setMarginTop( 400 );
+        $sectionStyle->setMarginBottom( 400 );
+
+        $section = $phpWord->addSection( $sectionStyle );
+
+        $phpWord->addParagraphStyle("pStyler", array( "align" => "right" ) );
+
+        
+
+        // $fontStyle = new \PhpOffice\PhpWord\Style\Font();
+        // $fontStyle->setRTL( true );
+        // var_dump( $fontStyle->isRTL() );
 
         foreach( $rows_and_columns as $index => $row ) {
 
             if ( $index === 1 ) continue;
             $sender = "هابینو";
-            $address = "آدرس: ";
-            $post_code = "کد پستی: ";
-            $mobile = "تلفن: ";
-            $fullname = "نام و نام خانوادگی: ";
-            $order_status = "وضعیت سفارش: ";
-            $order_date = "تاریخ سفارش: ";
-            $post_method = "نوع ارسال: ";
+            $full_address = "آدرس ";
+            $post_code = "کد پستی ";
+            $mobile = "تلفن ";
+            $fullname = "گیرنده ";
+            $order_status = "وضعیت سفارش ";
+            $order_date = "تاریخ سفارش ";
+            $post_method = "";
+            $order_id = "شماره سفارش ";
+            $city = "";
+            $state = "";
+            $address = "";
 
             foreach( $row as $idx => $column ) {
                 
                 // get address
                 if (
                     trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "billing: city" ||
-                    trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "billing: state" ||
-                    trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "billing: street address (full)" ||
-                    trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "shipping: city" ||
-                    trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "shipping: state" ||
-                    trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "shipping: street address (full)"
-                ) $address .= $column . " - ";
+                    trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "shipping: city"
+                ) $city = $column;
 
+                if (
+                    trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "billing: state" ||
+                    trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "shipping: state"
+                ) $state = $column;
+
+                if (
+                    trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "billing: street address (full)" ||
+                    trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "shipping: street address (full)"
+                ) $address = $column;
                 // get post code
                 if (
                     trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "billing: zip code" ||
                     trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "shipping: zip code"
-                ) $post_code .= $column;
+                ) {
+                    if ( trim( $post_method ) === "تیپاکس" )
+                    $post_code .= "0000000000";
+                    else
+                    $post_code .= $column;
+                }
 
                 // get mobile
                 if (
                     trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "billing: phone number" ||
                     trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "shipping: phone number"
                 ) $mobile .= $column;
+
+                // get order id
+                if (
+                    trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "order id"
+                ) $order_id .= $column;
 
                 // get mobile
                 if (
@@ -98,30 +134,14 @@ class Home extends BaseController
 
             }
 
-            // $table->addRow();
-            // $table->addCell()->addText( "{$sender}" );
-            // $table->addCell()->addText( "{$address}" );
-            // $table->addCell()->addText( "{$post_code}" );
-            // $table->addCell()->addText( "{$mobile}" );
-            // $table->addCell()->addText( "{$fullname}" );
-            // $table->addCell()->addText( "{$order_status}" );
-            // $table->addCell()->addText( "{$order_date}" );
-            // $table->addCell()->addText( "{$post_method}" );
+            // $section->addText( "{$sender}" );
+            $full_address .= $state . " - " . $city . " - " . $address;
+            $txt1 = $section->addText( "{$fullname}  {$order_id}", [], array('align' => 'right') );
+            $txt2 = $section->addText( "{$full_address}", [], array('align' => 'right') );
+            $txt3 = $section->addText( "{$post_code} {$mobile}", [], array('align' => 'right') );
 
-            $section->addText( "{$sender}" );
-            $section->addText( "{$address}" );
-            $section->addText( "{$post_code}" );
-            $section->addText( "{$mobile}" );
-            $section->addText( "{$fullname}" );
-            $section->addText( "{$order_status}" );
-            $section->addText( "{$order_date}" );
-            $section->addText( "{$post_method}" );
-
+            // $txt3->setFontStyle( $fontStyle, $fontStyle );
         }
-        
-        $phpWord->setDefaultFontSize(18);
-        // $phpWord->colsNum( 2 );
-        $phpWord->setDefaultFontName('Arial');
 
         $objWriter = PhpWordIOFactory::createWriter( $phpWord, 'Word2007' );
         $file_word_name = "Addresses.docx";
