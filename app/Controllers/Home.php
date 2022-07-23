@@ -43,8 +43,8 @@ class Home extends BaseController
         $sectionStyle->setColsSpace( 400 );
         $sectionStyle->setMarginLeft( 400 );
         $sectionStyle->setMarginRight( 400 );
-        $sectionStyle->setMarginTop( 400 );
-        $sectionStyle->setMarginBottom( 400 );
+        // $sectionStyle->setMarginTop( 400 );
+        // $sectionStyle->setMarginBottom( 400 );
 
         $section = $phpWord->addSection( $sectionStyle );
 
@@ -61,8 +61,8 @@ class Home extends BaseController
             if ( $index === 1 ) continue;
             $sender = "هابینو";
             $full_address = "آدرس ";
-            $post_code = "کد پستی ";
-            $mobile = "تلفن ";
+            $post_code = "کد پستی   ";
+            $mobile = "تلفن   ";
             $fullname = "گیرنده ";
             $order_status = "وضعیت سفارش ";
             $order_date = "تاریخ سفارش ";
@@ -138,7 +138,7 @@ class Home extends BaseController
             $full_address .= $state . " - " . $city . " - " . $address;
             $txt1 = $section->addText( "{$fullname}  {$order_id}", [], array('align' => 'right') );
             $txt2 = $section->addText( "{$full_address}", [], array('align' => 'right') );
-            $txt3 = $section->addText( "{$post_code} {$mobile}", [], array('align' => 'right') );
+            $txt3 = $section->addText( "{$post_code}    {$mobile}", [], array('align' => 'right') );
 
             // $txt3->setFontStyle( $fontStyle, $fontStyle );
         }
@@ -150,7 +150,7 @@ class Home extends BaseController
         echo "<a href='" . base_url( $file_word_name ) . "' id='download' >donwload file</a>
             <script>
                 document.getElementById( 'download' ).click();
-                setTimeout( () => { window.location.href='" . base_url( '/' ) . "' }, 500 );
+               // setTimeout( () => { window.location.href='" . base_url( '/' ) . "' }, 500 );
             </script>";
         echo "<hr/>";
         
