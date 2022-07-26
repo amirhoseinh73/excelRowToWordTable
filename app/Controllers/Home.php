@@ -5,6 +5,8 @@ namespace App\Controllers;
 use PhpOffice\PhpSpreadsheet\IOFactory as PhpExcelIOFactory;
 use PhpOffice\PhpWord\IOFactory as PhpWordIOFactory;
 use PhpOffice\PhpWord\PhpWord;
+use PhpOffice\PhpWord\Style\Font;
+use PhpOffice\PhpWord\Style\Section;
 
 class Home extends BaseController
 {
@@ -38,23 +40,23 @@ class Home extends BaseController
         $phpWord->setDefaultFontSize(14);
         $phpWord->setDefaultFontName('B Nazanin');
         
-        $sectionStyle = new \PhpOffice\PhpWord\Style\Section();
+        $sectionStyle = new Section();
         $sectionStyle->setColsNum( 2 );
         $sectionStyle->setColsSpace( 400 );
         $sectionStyle->setMarginLeft( 400 );
         $sectionStyle->setMarginRight( 400 );
-        // $sectionStyle->setMarginTop( 400 );
-        // $sectionStyle->setMarginBottom( 400 );
+        $sectionStyle->setMarginTop( 600 );
+        $sectionStyle->setMarginBottom( 600 );
 
         $section = $phpWord->addSection( $sectionStyle );
 
+        $fontStyle1 = new Font();
+        $fontStyle2 = new Font();
+        $fontStyle1->setRTL( true );
+        $fontStyle2->setRTL( true );
+        $fontStyle2->setUnderline( Font::UNDERLINE_SINGLE );
+
         $phpWord->addParagraphStyle("pStyler", array( "align" => "right" ) );
-
-        
-
-        // $fontStyle = new \PhpOffice\PhpWord\Style\Font();
-        // $fontStyle->setRTL( true );
-        // var_dump( $fontStyle->isRTL() );
 
         foreach( $rows_and_columns as $index => $row ) {
 
@@ -64,7 +66,7 @@ class Home extends BaseController
             $post_code = "کد پستی   ";
             $mobile = "تلفن   ";
             $fullname = "گیرنده ";
-            $order_status = "وضعیت سفارش ";
+            $order_status = null;
             $order_date = "تاریخ سفارش ";
             $post_method = "";
             $order_id = "شماره سفارش ";
@@ -120,7 +122,7 @@ class Home extends BaseController
                 // get order status
                 if (
                     trim( strtolower( $rows_and_columns[ 1 ][ $idx ] ) ) === "order status"
-                ) $order_status .= $column;
+                ) $order_status = $column;
                 
                 // get order date
                 if (
@@ -134,13 +136,27 @@ class Home extends BaseController
 
             }
 
+            if ( $order_status !== "تکمیل شده" ) continue;
+
             // $section->addText( "{$sender}" );
-            $full_address .= $state . " - " . $city . " - " . $address;
+            if ( $state === $city ) $full_address .= $state . " - " . $address;
+            else $full_address .= $state . " - " . $city . " - " . $address;
+
+            if ( strlen( $full_address ) < 220 ) {
+                $j = 0;
+                while( $j < ( 220 - strlen( $full_address ) ) ) {
+                    $full_address .= " -";
+                    $j++;
+                }
+            }
+
             $txt1 = $section->addText( "{$fullname}  {$order_id}", [], array('align' => 'right') );
             $txt2 = $section->addText( "{$full_address}", [], array('align' => 'right') );
             $txt3 = $section->addText( "{$post_code}    {$mobile}", [], array('align' => 'right') );
 
-            // $txt3->setFontStyle( $fontStyle, $fontStyle );
+            $txt1->setFontStyle( $fontStyle1 );
+            $txt2->setFontStyle( $fontStyle1 );
+            $txt3->setFontStyle( $fontStyle2 );
         }
 
         $objWriter = PhpWordIOFactory::createWriter( $phpWord, 'Word2007' );
